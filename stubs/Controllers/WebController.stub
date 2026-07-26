@@ -180,15 +180,14 @@ class WebController extends Controller
             'description' => $item->description,
         ]);
 
-        $coreValues = [];
-
-        $coreValues = $this->pageSectionService->getByPageSectionName(
+        $coreValuesSection = $this->pageSectionService->getByPageSectionName(
             'core-values',
             ['elements' => function ($query) {
                 $query->where('published', 1);
             }],
             true
-        )->elements;
+        );
+        $coreValues = $coreValuesSection ? $coreValuesSection->elements : [];
 
         return Inertia::render('About', [
             'welcome' => $welcome,
