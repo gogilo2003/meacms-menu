@@ -47,6 +47,7 @@ class MenuServiceProvider extends ServiceProvider
                 __DIR__.'/../resources/js/Components' => resource_path('js/Components'),
                 __DIR__.'/../resources/js/Composables' => resource_path('js/Composables'),
                 __DIR__.'/../resources/js/Layouts' => resource_path('js/Layouts'),
+                __DIR__.'/../resources/js/stores' => resource_path('js/stores'),
                 __DIR__.'/../stubs/Controllers/WebController.stub' => app_path('Http/Controllers/WebController.php'),
             ], 'meacms-menu-shared');
 
