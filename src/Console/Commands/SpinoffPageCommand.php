@@ -252,14 +252,17 @@ class SpinoffPageCommand extends Command
 
         $routeLine = "        Route::get('{$uri}', '{$methodName}')->name('{$routeName}');";
 
-        if (preg_match('/Route::controller\(WebController::class\)\s*->group\(function\s*\(\)\s*\{/s', $content, $matches, PREG_OFFSET_CAPTURE)) {
+        if (preg_match('/Route::controller\(\s*\\\\?App\\\\Http\\\\Controllers\\\\WebController::class\s*\)\s*->group\(function\s*\(\)\s*\{/s', $content, $matches, PREG_OFFSET_CAPTURE) || preg_match('/Route::controller\(\s*WebController::class\s*\)\s*->group\(function\s*\(\)\s*\{/s', $content, $matches, PREG_OFFSET_CAPTURE)) {
             $insertPos = $matches[0][1] + strlen($matches[0][0]);
             $updatedContent = substr_replace($content, "\n" . $routeLine, $insertPos, 0);
             File::put($routePath, $updatedContent);
             $this->components->twoColumnDetail('Route Added to WebController Group', "routes/web.php ('{$uri}' -> '{$methodName}')");
         } else {
-            File::append($routePath, "\n" . $routeLine . "\n");
-            $this->components->twoColumnDetail('Route Appended', "routes/web.php ({$uri})");
+            $groupBlock = "\nRoute::controller(\\App\\Http\\Controllers\\WebController::class)->group(function () {\n" .
+                          $routeLine . "\n" .
+                          "});\n";
+            File::append($routePath, $groupBlock);
+            $this->components->twoColumnDetail('Route Group Created', "routes/web.php ('{$uri}' -> '{$methodName}')");
         }
     }
 }
