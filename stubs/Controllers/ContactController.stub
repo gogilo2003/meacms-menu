@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use MeaCms\PageSections\Models\Element;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class ContactController extends Controller
+{
+    public function __invoke(Request $request): Response
+    {
+        $contacts = Element::where('name', 'phone')
+            ->orWhere('name', 'email')
+            ->orWhere('name', 'LIKE', '%address%')
+            ->orWhere('name', 'location')->get()->map(fn ($item) => (object) [
+                'id' => $item->id,
+                'name' => $item->name,
+                'title' => $item->title,
+                'content' => $item->content,
+                'icon' => $item->icon,
+            ]);
+
+        return Inertia::render('Contact', ['contacts' => $contacts]);
+    }
+}

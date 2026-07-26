@@ -1,0 +1,34 @@
+<script setup lang="ts">
+import WebLayout from '@/Layouts/WebLayout.vue';
+import WebHeader from '@/Layouts/WebHeader.vue';
+import Heading1 from '@/Components/Web/Heading1.vue';
+import Container from '@/Components/Container.vue';
+import usePageVisits from '@/Composables/usePageVisits';
+
+usePageVisits();
+
+defineProps<{
+    title?: string;
+}>();
+</script>
+
+<template>
+    <WebLayout :title="title ?? '{{name}}'">
+        <template #header>
+            <WebHeader>
+                <Heading1>{{ title ?? '{{name}}' }}</Heading1>
+                <div>Welcome to {{ title ?? '{{name}}' }}</div>
+            </WebHeader>
+        </template>
+        <div class="bg-white py-12">
+            <Container>
+                <div class="prose max-w-none">
+                    <h2 class="text-2xl font-bold mb-4">{{ title ?? '{{name}}' }}</h2>
+                    <p class="text-gray-600">
+                        This is the {{ name }} page content generated automatically by MeaCMS.
+                    </p>
+                </div>
+            </Container>
+        </div>
+    </WebLayout>
+</template>

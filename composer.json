@@ -1,0 +1,31 @@
+{
+    "name": "meacms/menu",
+    "description": "Centralized menu registry for the Laravel starter kit. Packages register admin and public menu items; the host exposes them as the single source of truth.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "MeaCms Team",
+            "email": "team@meacms.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^13.0",
+        "gogilo/breeze": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "MeaCms\\Menu\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MeaCms\\Menu\\MenuServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use MeaCms\PageSections\Models\Element;
+use MeaCms\News\Models\NewsArticle;
+use MeaCms\PageSections\Models\PageSection;
+use MeaCms\Menu\Models\Picture;
+use MeaCms\Partners\Models\Partner;
+use MeaCms\Menu\Support\Util;
+use MeaCms\Slides\Models\Slide;
+use MeaCms\PageSections\Services\PageSectionService;
+use MeaCms\Products\Models\Product;
+use MeaCms\Products\Services\ProductCategoryService;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class HomeController extends Controller
+{
+    public function __invoke(Request $request): Response
+    {
+        $productCategoryService = app(ProductCategoryService::class);
+        $pageSectionService = app(PageSectionService::class);
+
+        $products = Product::where('published', 1)
+            ->where('front', 1)
+            ->orderBy('created_at', 'DESC')->get()->map(fn ($item) => [
+                'id' => $item->id,
+                'title' => $item->title,
+                'url' => route('product', $item->slug),
+                'picture' => $item->pictures->count() ? Util::pictureUrl($item->pictures()->first()->name) : null,
+                'summary' => $item->summary,
+            ]);
+
+        $product_categories = $productCategoryService->getAllProductCategories(['filters' => ['published' => 1, 'promoted' => 1]], true);
+
+        $slides = Slide::where('published', 1)->get()->map(fn ($item) => [
+            'id' => $item->id,
+            'title' => $item->title ?? config('app.name'),
+            'picture' => Util::pictureUrl($item->picture),
+            'media_type' => $item->media_type,
+            'caption' => $item->caption ?? 'Rooted in Values, Growing with Excellence.',
+            'published' => $item->published,
+        ]);
+
+        $product_intro = ($intro = Element::where('name', 'product-intro')->first()) ? $intro->content : '';
+        $project_intro = ($intro = Element::where('name', 'project-intro')->first()) ? $intro->content : '';
+
+        $partners = Partner::where('published', 1)->where('front', 1)->get()->map(fn ($item) => [
+            'id' => $item->id,
+            'title' => $item->title,
+            'logo' => Util::pictureUrl($item->logo),
+            'website' => $item->website,
+            'description' => $item->description,
+        ]);
+
+        $welcome = Element::where('name', 'welcome')->where('published', 1)->first();
+
+        $industriesSection = PageSection::where('name', 'like', 'industries-we-serve')
+            ->with(['elements' => fn ($q) => $q->where('published', 1)])
+            ->first();
+
+        $customers = $pageSectionService->getByPageSectionName('featured-customers', ['elements'], true);
+        $categories = $productCategoryService->getAllProductCategories(['filters' => ['published' => 1, 'promoted' => 1]], true);
+
+        return Inertia::render('Home', [
+            'products' => $products,
+            'product_categories' => $product_categories,
+            'slides' => $slides,
+            'product_intro' => $product_intro,
+            'project_intro' => $project_intro,
+            'partners' => $partners,
+            'customers' => $customers,
+            'categories' => $categories,
+            'welcome' => $welcome ? [
+                'id' => $welcome->id,
+                'title' => $welcome->title,
+                'content' => $welcome->content,
+                'icon' => $welcome->icon,
+                'photo' => Util::pictureUrl($welcome->photo),
+            ] : null,
+            'industriesSection' => $industriesSection ? (object) [
+                'id' => $industriesSection->id,
+                'title' => $industriesSection->title,
+                'description' => $industriesSection->description,
+                'elements' => $industriesSection->elements->map(fn (Element $element) => [
+                    'id' => $element->id,
+                    'title' => $element->title,
+                    'content' => $element->content,
+                    'icon' => $element->icon,
+                    'photo' => Util::pictureUrl($element->photo),
+                ]),
+            ] : null,
+        ]);
+    }
+}
